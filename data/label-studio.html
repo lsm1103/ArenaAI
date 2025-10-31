@@ -1,0 +1,429 @@
+<View style="padding: 16px">
+    <Header value="观看视频 → 选择剧本类型 → 为各身份从 speakers 中指派对应人物" />
+
+    <!-- 视频 -->
+    <Video name="vid" value="$video" />
+    <!-- 显示视频地址 -->
+    <Header value="视频地址：" />
+    <Text name="video_url" value="$video" />
+
+    <!-- 在时间轴上标注：单击=单帧时间戳；拖拽=时间区间 -->
+    <Header value="② 在时间轴上标注（单击=时间点；拖拽=时间段）" />
+    <TimelineLabels name="time_marks" toName="vid">
+        <Label value="第0天-夜间(首夜)" maxUsages="1" />
+        <Label value="第一天-白天-警徽竞选（警上）" maxUsages="1" />
+        <Label value="第一天-白天-发言（警下）" maxUsages="1" />
+        <Label value="第一天-夜晚" maxUsages="1" />
+        <Label value="第二天-白天-发言" maxUsages="1" />
+        <Label value="第二天-夜晚" maxUsages="1" />
+        <Label value="第三天-白天-发言" maxUsages="1" />
+        <Label value="第三天-夜晚" maxUsages="1" />
+        <Label value="第四天-白天-发言" maxUsages="1" />
+        <Label value="第四天-夜晚" maxUsages="1" />
+        <Label value="第五天-白天-发言" maxUsages="1" />
+        <Label value="第五天-夜晚" maxUsages="1" />
+        <Label value="第六天-白天-发言" maxUsages="1" />
+        <Label value="第六天-夜晚" maxUsages="1" />
+        <Label value="结局法官总结" maxUsages="1" />
+    </TimelineLabels>
+
+    <!-- ① 选择剧本类型（单选） -->
+    <Header value="① 选择剧本类型" />
+    <Choices name="scenario" toName="vid" choice="single" required="true">
+        <Choice value="预女猎白混" />
+        <Choice value="盗宝大师" />
+        <Choice value="机械狼通灵师" />
+        <Choice value="孤注一掷" />
+        <Choice value="假面舞会" />
+    </Choices>
+
+    <Style>
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        
+        .role-card {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        
+        .role-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+    </Style>
+
+    <!-- 公共：一个身份块模板（说明：每个块是从 speakers 里挑人） -->
+    <!-- 用法：为每个身份创建一个 Choices；单人身份用 single-radio；名额>1 的身份拆成多个 slot -->
+    <!-- 也可在每个 Choices 前加 Filter 以便搜索 speakers -->
+
+    <!-- ===== 预女猎白混 ===== -->
+    <View visibleWhen="choice-selected" whenTagName="scenario" whenChoiceValue="预女猎白混">
+        <Header value="② 预女猎白混：为每个身份指派 speaker（狼人×4，平民×3）" />
+        <View className="role-grid">
+
+            <View className="role-card">
+                <Header className="role-title" value="预言家（1人）" />
+                <Filter name="f_yj" toName="r_yuyan" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_yuyan" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+
+            <View className="role-card">
+                <Header className="role-title" value="女巫（1人）" />
+                <Filter name="f_nw" toName="r_nvwu" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_nvwu" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+
+            <View className="role-card">
+                <Header className="role-title" value="猎人（1人）" />
+                <Filter name="f_lr" toName="r_lieren" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_lieren" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+
+            <View className="role-card">
+                <Header className="role-title" value="白神（1人）" />
+                <Filter name="f_bs" toName="r_baishen" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_baishen" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+
+            <View className="role-card">
+                <Header className="role-title" value="混血儿（1人）" />
+                <Filter name="f_hxe" toName="r_hunxue" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_hunxue" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+
+            <!-- 狼人-4 → 4 个名额槽 -->
+            <View className="role-card">
+                <Header className="role-title" value="狼人(1/4)" />
+                <Filter name="f_lr1" toName="r_langren1" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_langren1" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="狼人(2/4)" />
+                <Filter name="f_lr2" toName="r_langren2" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_langren2" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="狼人(3/4)" />
+                <Filter name="f_lr3" toName="r_langren3" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_langren3" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="狼人(4/4)" />
+                <Filter name="f_lr4" toName="r_langren4" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_langren4" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+
+            <!-- 平民-3 → 3 个名额槽 -->
+            <View className="role-card">
+                <Header className="role-title" value="平民(1/3)" />
+                <Filter name="f_pm1" toName="r_pingmin1" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_pingmin1" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="平民(2/3)" />
+                <Filter name="f_pm2" toName="r_pingmin2" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_pingmin2" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="平民(3/3)" />
+                <Filter name="f_pm3" toName="r_pingmin3" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_pingmin3" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+
+        </View>
+    </View>
+
+    <!-- ===== 盗宝大师 ===== -->
+    <View visibleWhen="choice-selected" whenTagName="scenario" whenChoiceValue="盗宝大师">
+        <Header value="② 盗宝大师：通灵师、毒师、摄梦人、蒙面人、猎人、盗宝大师（各1）；平民×4、狼人×3" />
+        <View className="role-grid">
+            <!-- 单人身份 -->
+            <View className="role-card">
+                <Header className="role-title" value="通灵师（1人）" />
+                <Filter name="f_tls" toName="r_tls" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_tls" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="毒师（1人）" />
+                <Filter name="f_ds" toName="r_ds" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_ds" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="摄梦人（1人）" />
+                <Filter name="f_smr" toName="r_smr" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_smr" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="蒙面人（1人）" />
+                <Filter name="f_mmr" toName="r_mmr" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_mmr" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="猎人（1人）" />
+                <Filter name="f_lr_d" toName="r_lrd" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_lrd" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="盗宝大师（1人）" />
+                <Filter name="f_dbd" toName="r_dbd" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_dbd" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+
+            <!-- 平民-4 -->
+            <View className="role-card">
+                <Header className="role-title" value="平民(1/4)" />
+                <Filter name="f_pm1_d" toName="r_pm1_d" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_pm1_d" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="平民(2/4)" />
+                <Filter name="f_pm2_d" toName="r_pm2_d" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_pm2_d" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="平民(3/4)" />
+                <Filter name="f_pm3_d" toName="r_pm3_d" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_pm3_d" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="平民(4/4)" />
+                <Filter name="f_pm4_d" toName="r_pm4_d" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_pm4_d" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+
+            <!-- 狼人-3 -->
+            <View className="role-card">
+                <Header className="role-title" value="狼人(1/3)" />
+                <Filter name="f_lrd1" toName="r_lrd1" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_lrd1" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="狼人(2/3)" />
+                <Filter name="f_lrd2" toName="r_lrd2" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_lrd2" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="狼人(3/3)" />
+                <Filter name="f_lrd3" toName="r_lrd3" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_lrd3" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+        </View>
+    </View>
+
+    <!-- ===== 机械狼通灵师 ===== -->
+    <View visibleWhen="choice-selected" whenTagName="scenario" whenChoiceValue="机械狼通灵师">
+        <Header value="② 机械狼通灵师：通灵师、女巫、猎人、守卫、机械狼（各1）；狼人×3、平民×4" />
+        <View className="role-grid">
+            <View className="role-card">
+                <Header className="role-title" value="通灵师（1人）" />
+                <Filter name="f_tls_j" toName="r_tls_j" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_tls_j" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="女巫（1人）" />
+                <Filter name="f_nw_j" toName="r_nw_j" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_nw_j" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="猎人（1人）" />
+                <Filter name="f_lr_j" toName="r_lr_j" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_lr_j" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="守卫（1人）" />
+                <Filter name="f_sw_j" toName="r_sw_j" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_sw_j" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="机械狼（1人）" />
+                <Filter name="f_jxl" toName="r_jxl" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_jxl" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+
+            <!-- 狼人-3 -->
+            <View className="role-card">
+                <Header className="role-title" value="狼人(1/3)" />
+                <Filter name="f_jl1" toName="r_jl1" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_jl1" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="狼人(2/3)" />
+                <Filter name="f_jl2" toName="r_jl2" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_jl2" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="狼人(3/3)" />
+                <Filter name="f_jl3" toName="r_jl3" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_jl3" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+
+            <!-- 平民-4 -->
+            <View className="role-card">
+                <Header className="role-title" value="平民(1/4)" />
+                <Filter name="f_jpm1" toName="r_jpm1" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_jpm1" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="平民(2/4)" />
+                <Filter name="f_jpm2" toName="r_jpm2" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_jpm2" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="平民(3/4)" />
+                <Filter name="f_jpm3" toName="r_jpm3" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_jpm3" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="平民(4/4)" />
+                <Filter name="f_jpm4" toName="r_jpm4" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_jpm4" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+        </View>
+    </View>
+
+    <!-- ===== 孤注一掷 ===== -->
+    <View visibleWhen="choice-selected" whenTagName="scenario" whenChoiceValue="孤注一掷">
+        <Header value="② 孤注一掷：预言家、女巫、猎人、摄梦人、典狱长（各1）；狼人×3、平民×4" />
+        <View className="role-grid">
+            <View className="role-card">
+                <Header className="role-title" value="预言家（1人）" />
+                <Filter name="f_yj_g" toName="r_yj_g" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_yj_g" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="女巫（1人）" />
+                <Filter name="f_nw_g" toName="r_nw_g" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_nw_g" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="猎人（1人）" />
+                <Filter name="f_lr_g" toName="r_lr_g" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_lr_g" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="摄梦人（1人）" />
+                <Filter name="f_smr_g" toName="r_smr_g" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_smr_g" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="典狱长（1人）" />
+                <Filter name="f_dyz" toName="r_dyz" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_dyz" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+
+            <!-- 狼人-3 -->
+            <View className="role-card">
+                <Header className="role-title" value="狼人(1/3)" />
+                <Filter name="f_gl1" toName="r_gl1" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_gl1" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="狼人(2/3)" />
+                <Filter name="f_gl2" toName="r_gl2" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_gl2" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="狼人(3/3)" />
+                <Filter name="f_gl3" toName="r_gl3" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_gl3" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+
+            <!-- 平民-4 -->
+            <View className="role-card">
+                <Header className="role-title" value="平民(1/4)" />
+                <Filter name="f_gpm1" toName="r_gpm1" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_gpm1" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="平民(2/4)" />
+                <Filter name="f_gpm2" toName="r_gpm2" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_gpm2" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="平民(3/4)" />
+                <Filter name="f_gpm3" toName="r_gpm3" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_gpm3" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="平民(4/4)" />
+                <Filter name="f_gpm4" toName="r_gpm4" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_gpm4" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+        </View>
+    </View>
+
+    <!-- ===== 假面舞会 ===== -->
+    <View visibleWhen="choice-selected" whenTagName="scenario" whenChoiceValue="假面舞会">
+        <Header value="② 假面舞会：预言家、女巫、白神、舞者、假面（各1）；狼人×3、平民×4" />
+        <View className="role-grid">
+            <View className="role-card">
+                <Header className="role-title" value="预言家（1人）" />
+                <Filter name="f_yj_jm" toName="r_yj_jm" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_yj_jm" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="女巫（1人）" />
+                <Filter name="f_nw_jm" toName="r_nw_jm" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_nw_jm" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="白神（1人）" />
+                <Filter name="f_bs_jm" toName="r_bs_jm" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_bs_jm" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="舞者（1人）" />
+                <Filter name="f_wz" toName="r_wz" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_wz" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="假面（1人）" />
+                <Filter name="f_jm" toName="r_jm" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_jm" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+
+            <!-- 狼人-3 -->
+            <View className="role-card">
+                <Header className="role-title" value="狼人(1/3)" />
+                <Filter name="f_jmw1" toName="r_jmw1" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_jmw1" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="狼人(2/3)" />
+                <Filter name="f_jmw2" toName="r_jmw2" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_jmw2" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="狼人(3/3)" />
+                <Filter name="f_jmw3" toName="r_jmw3" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_jmw3" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+
+            <!-- 平民-4 -->
+            <View className="role-card">
+                <Header className="role-title" value="平民(1/4)" />
+                <Filter name="f_jmpm1" toName="r_jmpm1" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_jmpm1" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="平民(2/4)" />
+                <Filter name="f_jmpm2" toName="r_jmpm2" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_jmpm2" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="平民(3/4)" />
+                <Filter name="f_jmpm3" toName="r_jmpm3" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_jmpm3" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+            <View className="role-card">
+                <Header className="role-title" value="平民(4/4)" />
+                <Filter name="f_jmpm4" toName="r_jmpm4" minlength="0" placeholder="搜索 speaker" />
+                <Choices name="r_jmpm4" toName="vid" choice="single" layout="select" required="true" value="$speakers" />
+            </View>
+        </View>
+    </View>
+</View>

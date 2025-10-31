@@ -1,0 +1,418 @@
+{
+    "id": 725981,
+    "data": {
+        "video": "/data/local-files/?d=langrensha_data/31877824880-1-192.mp4",
+        "speakers": [
+            {
+                "value": "辉少"
+            },
+            {
+                "value": "囚徒"
+            },
+            {
+                "value": "圈圈"
+            },
+            {
+                "value": "猫儿曼"
+            },
+            {
+                "value": "申屠"
+            },
+            {
+                "value": "耿许儿"
+            },
+            {
+                "value": "KS"
+            },
+            {
+                "value": "戴士"
+            },
+            {
+                "value": "陈明俊"
+            },
+            {
+                "value": "狼行"
+            },
+            {
+                "value": "园长"
+            },
+            {
+                "value": "曲奇"
+            },
+            {
+                "value": "郭小炜"
+            },
+            {
+                "value": "李斯"
+            },
+            {
+                "value": "牛肉干"
+            },
+            {
+                "value": "董鲸鱼"
+            },
+            {
+                "value": "徐言雨"
+            },
+            {
+                "value": "李鬼鬼"
+            },
+            {
+                "value": "果冻"
+            },
+            {
+                "value": "长南"
+            },
+            {
+                "value": "荣耀"
+            },
+            {
+                "value": "水瓶座"
+            },
+            {
+                "value": "盼盼"
+            },
+            {
+                "value": "陈俊杰"
+            },
+            {
+                "value": "宝玉妹妹"
+            },
+            {
+                "value": "蓝桉"
+            },
+            {
+                "value": "大卫"
+            },
+            {
+                "value": "dreamyu"
+            },
+            {
+                "value": "萱萱"
+            },
+            {
+                "value": "彭彭"
+            },
+            {
+                "value": "栗子"
+            },
+            {
+                "value": "翼风"
+            },
+            {
+                "value": "又又"
+            },
+            {
+                "value": "诅咒"
+            },
+            {
+                "value": "老过客"
+            },
+            {
+                "value": "亚亚"
+            },
+            {
+                "value": "舟舟侠"
+            },
+            {
+                "value": "笑笑"
+            },
+            {
+                "value": "郭帅"
+            },
+            {
+                "value": "饱嗝"
+            },
+            {
+                "value": "大道寺"
+            },
+            {
+                "value": "嘴大"
+            },
+            {
+                "value": "蛋黄派"
+            },
+            {
+                "value": "妹妹"
+            },
+            {
+                "value": "凉歌"
+            },
+            {
+                "value": "七七"
+            },
+            {
+                "value": "小猪"
+            },
+            {
+                "value": "橘子"
+            },
+            {
+                "value": "闹子"
+            },
+            {
+                "value": "大鹏"
+            },
+            {
+                "value": "六六"
+            },
+            {
+                "value": "章亿阳"
+            },
+            {
+                "value": "王炸"
+            },
+            {
+                "value": "王予初"
+            },
+            {
+                "value": "加伏特加"
+            },
+            {
+                "value": "波比"
+            }
+        ]
+    },
+    "annotations": [
+        {
+            "id": 501775,
+            "result": [
+                {
+                    "value": {
+                        "choices": [
+                            "预女猎白混"
+                        ]
+                    },
+                    "id": "WyJIGPOaCr",
+                    "from_name": "scenario",
+                    "to_name": "vid",
+                    "type": "choices",
+                    "origin": "manual"
+                },
+                {
+                    "value": {
+                        "choices": [
+                            "囚徒"
+                        ]
+                    },
+                    "id": "y5qwj-o9xY",
+                    "from_name": "r_yuyan",
+                    "to_name": "vid",
+                    "type": "choices",
+                    "origin": "manual"
+                },
+                {
+                    "value": {
+                        "choices": [
+                            "圈圈"
+                        ]
+                    },
+                    "id": "f5DvYcekQ-",
+                    "from_name": "r_baishen",
+                    "to_name": "vid",
+                    "type": "choices",
+                    "origin": "manual"
+                },
+                {
+                    "value": {
+                        "choices": [
+                            "李斯"
+                        ]
+                    },
+                    "id": "GHkfOR9m0p",
+                    "from_name": "r_langren1",
+                    "to_name": "vid",
+                    "type": "choices",
+                    "origin": "manual"
+                },
+                {
+                    "value": {
+                        "choices": [
+                            "果冻"
+                        ]
+                    },
+                    "id": "i1wN2dqleI",
+                    "from_name": "r_hunxue",
+                    "to_name": "vid",
+                    "type": "choices",
+                    "origin": "manual"
+                },
+                {
+                    "value": {
+                        "choices": [
+                            "李鬼鬼"
+                        ]
+                    },
+                    "id": "0-syXFz6yt",
+                    "from_name": "r_langren2",
+                    "to_name": "vid",
+                    "type": "choices",
+                    "origin": "manual"
+                },
+                {
+                    "value": {
+                        "choices": [
+                            "KS"
+                        ]
+                    },
+                    "id": "t_m9TgebyX",
+                    "from_name": "r_langren3",
+                    "to_name": "vid",
+                    "type": "choices",
+                    "origin": "manual"
+                },
+                {
+                    "value": {
+                        "choices": [
+                            "耿许儿"
+                        ]
+                    },
+                    "id": "5-4349uQXS",
+                    "from_name": "r_pingmin1",
+                    "to_name": "vid",
+                    "type": "choices",
+                    "origin": "manual"
+                },
+                {
+                    "value": {
+                        "choices": [
+                            "董鲸鱼"
+                        ]
+                    },
+                    "id": "bUa96_ebNm",
+                    "from_name": "r_nvwu",
+                    "to_name": "vid",
+                    "type": "choices",
+                    "origin": "manual"
+                },
+                {
+                    "value": {
+                        "choices": [
+                            "诅咒"
+                        ]
+                    },
+                    "id": "BcEaHhGXi3",
+                    "from_name": "r_langren4",
+                    "to_name": "vid",
+                    "type": "choices",
+                    "origin": "manual"
+                },
+                {
+                    "value": {
+                        "choices": [
+                            "翼风"
+                        ]
+                    },
+                    "id": "Xd963Idsp1",
+                    "from_name": "r_lieren",
+                    "to_name": "vid",
+                    "type": "choices",
+                    "origin": "manual"
+                },
+                {
+                    "value": {
+                        "choices": [
+                            "戴士"
+                        ]
+                    },
+                    "id": "AshCKQqq1y",
+                    "from_name": "r_pingmin2",
+                    "to_name": "vid",
+                    "type": "choices",
+                    "origin": "manual"
+                },
+                {
+                    "value": {
+                        "choices": [
+                            "陈明俊"
+                        ]
+                    },
+                    "id": "mPSBbtGEeq",
+                    "from_name": "r_pingmin3",
+                    "to_name": "vid",
+                    "type": "choices",
+                    "origin": "manual"
+                },
+                {
+                    "value": {
+                        "ranges": [
+                            {
+                                "start": 30447,
+                                "end": 30447
+                            }
+                        ],
+                        "timelinelabels": [
+                            "第一天-白天-警徽竞选（警上）"
+                        ]
+                    },
+                    "id": "zHxsM5jTu6",
+                    "from_name": "time_marks",
+                    "to_name": "vid",
+                    "type": "timelinelabels",
+                    "origin": "manual"
+                },
+                {
+                    "value": {
+                        "ranges": [
+                            {
+                                "start": 49108,
+                                "end": 49108
+                            }
+                        ],
+                        "timelinelabels": [
+                            "第一天-白天-发言（警下）"
+                        ]
+                    },
+                    "id": "bD9Rcs0Nop",
+                    "from_name": "time_marks",
+                    "to_name": "vid",
+                    "type": "timelinelabels",
+                    "origin": "manual"
+                },
+                {
+                    "value": {
+                        "ranges": [
+                            {
+                                "start": 25162,
+                                "end": 25162
+                            }
+                        ],
+                        "timelinelabels": [
+                            "第0天-夜间(首夜)"
+                        ]
+                    },
+                    "id": "fqIEcSB_T_",
+                    "from_name": "time_marks",
+                    "to_name": "vid",
+                    "type": "timelinelabels",
+                    "origin": "manual"
+                }
+            ],
+            "created_username": " 1454994@qq.com, 49",
+            "created_ago": "2 months",
+            "completed_by": {
+                "id": 49,
+                "first_name": "",
+                "last_name": "",
+                "avatar": null,
+                "email": "1454994@qq.com",
+                "initials": "14"
+            },
+            "was_cancelled": false,
+            "ground_truth": false,
+            "created_at": "2025-08-25T02:41:49.663401Z",
+            "updated_at": "2025-08-26T07:29:36.425646Z",
+            "draft_created_at": "2025-08-25T02:38:55.632409Z",
+            "lead_time": 9921.221,
+            "import_id": null,
+            "last_action": null,
+            "task": 725981,
+            "project": 594,
+            "updated_by": 49,
+            "parent_prediction": null,
+            "parent_annotation": null,
+            "last_created_by": null
+        }
+    ],
+    "predictions": []
+}
