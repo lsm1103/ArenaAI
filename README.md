@@ -17,6 +17,14 @@ https://label.91jzx.cn/projects/594/data?tab=560&task=725981
 
 ## 资料
 """
+第0天-夜间(首夜)
+day0-night   day0-night-poit
+
+第一天-白天-警徽竞选（警上）
+day1-policeUp   day1-policeUp-poit
+
+第一天-白天-警徽竞选（警下）
+day1-policeUDown    day1-policeUDown-poit
 
 预女猎白混[s]
 盗宝大师[d]
