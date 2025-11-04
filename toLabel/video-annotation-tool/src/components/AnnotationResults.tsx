@@ -8,19 +8,30 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Plus, X, Edit2, Check } from 'lucide-react'
 import { VideoAnnotation, TimelineAnnotation } from './AnnotationInterface'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface AnnotationResultsProps {
   annotation: VideoAnnotation
   onAnnotationChange: (annotation: VideoAnnotation) => void
   onTimelineAnnotationUpdate?: (id: string, updates: Partial<TimelineAnnotation>) => void
   onTimelineAnnotationDelete?: (id: string) => void
+  availableLabels?: string[]
 }
 
 export function AnnotationResults({ 
   annotation, 
   onAnnotationChange, 
   onTimelineAnnotationUpdate,
-  onTimelineAnnotationDelete 
+  onTimelineAnnotationDelete,
+  availableLabels = ['标签1', '标签2', '标签3']
 }: AnnotationResultsProps) {
   const [newLabel, setNewLabel] = useState('')
   const [newDescription, setNewDescription] = useState('')
@@ -124,12 +135,21 @@ export function AnnotationResults({
                     <div key={item.id} className="p-3 bg-blue-50 rounded-lg border border-blue-200 text-xs">
                       {editingAnnotation === item.id ? (
                         <div className="space-y-2">
-                          <Input
-                            value={editLabel}
-                            onChange={(e) => setEditLabel(e.target.value)}
-                            className="text-xs h-8"
-                            placeholder="标签"
-                          />
+                          <Select value={editLabel} onValueChange={(v) => setEditLabel(v)}>
+                            <SelectTrigger className="h-8 text-xs w-full">
+                              <SelectValue placeholder="选择标签" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {groupLabels(availableLabels).map((group) => (
+                                <SelectGroup key={group.name}>
+                                  <SelectLabel>{group.name}</SelectLabel>
+                                  {group.options.map((opt) => (
+                                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <Textarea
                             value={editDescription}
                             onChange={(e) => setEditDescription(e.target.value)}
@@ -195,12 +215,21 @@ export function AnnotationResults({
                     <div key={item.id} className="p-3 bg-yellow-50 rounded-lg border border-yellow-200 text-xs">
                       {editingAnnotation === item.id ? (
                         <div className="space-y-2">
-                          <Input
-                            value={editLabel}
-                            onChange={(e) => setEditLabel(e.target.value)}
-                            className="text-xs h-8"
-                            placeholder="标签"
-                          />
+                          <Select value={editLabel} onValueChange={(v) => setEditLabel(v)}>
+                            <SelectTrigger className="h-8 text-xs w-full">
+                              <SelectValue placeholder="选择标签" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {groupLabels(availableLabels).map((group) => (
+                                <SelectGroup key={group.name}>
+                                  <SelectLabel>{group.name}</SelectLabel>
+                                  {group.options.map((opt) => (
+                                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <Textarea
                             value={editDescription}
                             onChange={(e) => setEditDescription(e.target.value)}
@@ -273,15 +302,25 @@ export function AnnotationResults({
                     </Badge>
                   ))}
                 </div>
-                <div className="flex space-x-2">
-                  <Input
-                    value={newLabel}
-                    onChange={(e) => setNewLabel(e.target.value)}
-                    placeholder="添加新标签"
-                    className="text-xs h-8"
-                    onKeyPress={(e) => e.key === 'Enter' && addLabel()}
-                  />
-                  <Button size="sm" onClick={addLabel} className="h-8 px-3">
+                <div className="flex space-x-2 items-center">
+                  <div className="flex-1">
+                    <Select value={newLabel} onValueChange={(v) => setNewLabel(v)}>
+                      <SelectTrigger className="h-8 text-xs w-full">
+                        <SelectValue placeholder="选择标签" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {groupLabels(availableLabels).map((group) => (
+                          <SelectGroup key={group.name}>
+                            <SelectLabel>{group.name}</SelectLabel>
+                            {group.options.map((opt) => (
+                              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            ))}
+                          </SelectGroup>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button size="sm" onClick={addLabel} className="h-8 px-3" disabled={!newLabel}>
                     <Plus className="w-3 h-3" />
                   </Button>
                 </div>
@@ -327,4 +366,16 @@ export function AnnotationResults({
       </div>
     </div>
   )
+}
+
+function groupLabels(labels: string[]): { name: string; options: string[] }[] {
+  const map = new Map<string, string[]>()
+  for (const label of labels && labels.length ? labels : ['标签1', '标签2', '标签3']) {
+    const parts = label.split('/')
+    const group = parts[0]
+    const arr = map.get(group) ?? []
+    arr.push(label)
+    map.set(group, arr)
+  }
+  return Array.from(map.entries()).map(([name, options]) => ({ name, options }))
 }

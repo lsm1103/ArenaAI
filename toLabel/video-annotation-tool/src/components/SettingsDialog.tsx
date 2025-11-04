@@ -7,6 +7,15 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Plus, X } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface SettingsDialogProps {
   open: boolean
@@ -17,6 +26,9 @@ interface SettingsDialogProps {
 
 export function SettingsDialog({ open, onClose, availableLabels, onLabelsChange }: SettingsDialogProps) {
   const [newLabel, setNewLabel] = useState('')
+  const [parentLabel, setParentLabel] = useState('')
+  const [selectedParent, setSelectedParent] = useState('')
+  const [childLabel, setChildLabel] = useState('')
 
   const addLabel = () => {
     if (newLabel.trim() && !availableLabels.includes(newLabel.trim())) {
@@ -27,6 +39,21 @@ export function SettingsDialog({ open, onClose, availableLabels, onLabelsChange 
 
   const removeLabel = (labelToRemove: string) => {
     onLabelsChange(availableLabels.filter(label => label !== labelToRemove))
+  }
+
+  const parentGroups = Array.from(new Set((availableLabels || []).map(l => l.split('/')[0])))
+
+  const addHierarchicalLabel = () => {
+    const parent = (selectedParent || parentLabel).trim()
+    const child = childLabel.trim()
+    if (!parent || !child) return
+    const combined = `${parent}/${child}`
+    if (!availableLabels.includes(combined)) {
+      onLabelsChange([...availableLabels, combined])
+    }
+    setParentLabel('')
+    setSelectedParent('')
+    setChildLabel('')
   }
 
   return (
@@ -83,6 +110,51 @@ export function SettingsDialog({ open, onClose, availableLabels, onLabelsChange 
                 <Plus className="w-4 h-4 mr-1" />
                 添加
               </Button>
+            </div>
+
+            {/* 添加层级标签（父/子）*/}
+            <div className="space-y-2">
+              <Label className="text-sm">添加层级标签：</Label>
+              <div className="grid grid-cols-3 gap-2 items-center">
+                <div className="col-span-1">
+                  <Select value={selectedParent} onValueChange={setSelectedParent}>
+                    <SelectTrigger className="h-8 text-xs w-full">
+                      <SelectValue placeholder="选择父级标签" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>父级标签</SelectLabel>
+                        {parentGroups.map((p) => (
+                          <SelectItem key={p} value={p}>{p}</SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="col-span-1">
+                  <Input
+                    placeholder="或输入新父级"
+                    value={parentLabel}
+                    onChange={(e) => setParentLabel(e.target.value)}
+                    className="h-8 text-xs"
+                  />
+                </div>
+                <div className="col-span-1">
+                  <Input
+                    placeholder="输入子级"
+                    value={childLabel}
+                    onChange={(e) => setChildLabel(e.target.value)}
+                    className="h-8 text-xs"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button size="sm" onClick={addHierarchicalLabel} disabled={!(selectedParent || parentLabel) || !childLabel} className="h-8 px-3">
+                  <Plus className="w-3 h-3 mr-1" />
+                  添加父/子
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500">也可直接使用“父/子/子”格式添加到上方输入框。</p>
             </div>
           </div>
 

@@ -2,6 +2,15 @@
 
 import { useState, useRef, useEffect, useCallback, type ReactNode } from 'react'
 import { TimelineAnnotation } from './AnnotationInterface'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface VideoTimelineProps {
   duration: number
@@ -12,6 +21,8 @@ interface VideoTimelineProps {
   onAnnotationUpdate: (id: string, annotation: Partial<TimelineAnnotation>) => void
   onAnnotationDelete: (id: string) => void
   selectedTool: 'pointer' | 'segment' | 'timestamp'
+  trackCount?: number
+  availableLabels?: string[]
 }
 
 export function VideoTimeline({
@@ -22,7 +33,9 @@ export function VideoTimeline({
   onAnnotationAdd,
   onAnnotationUpdate,
   onAnnotationDelete,
-  selectedTool
+  selectedTool,
+  trackCount = 1,
+  availableLabels = ['标签1', '标签2', '标签3']
 }: VideoTimelineProps) {
   const timelineRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -33,7 +46,11 @@ export function VideoTimeline({
     type: 'segment' | 'timestamp'
     startTime: number
     endTime?: number
+    trackIndex: number
   } | null>(null)
+  const [selectedDialogLabel, setSelectedDialogLabel] = useState('')
+
+  const laneHeight = 24
 
   // 时间格式化
   const formatTime = (seconds: number) => {
@@ -60,6 +77,14 @@ export function VideoTimeline({
     return percentage * rect.width
   }, [duration])
 
+  const clientYToTrack = (clientY: number) => {
+    if (!timelineRef.current) return 0
+    const rect = timelineRef.current.getBoundingClientRect()
+    const y = Math.max(0, Math.min(clientY - rect.top, rect.height))
+    const idx = Math.floor(y / laneHeight)
+    return Math.max(0, Math.min(idx, Math.max(0, trackCount - 1)))
+  }
+
   // 处理鼠标按下
   const handleMouseDown = (e: React.MouseEvent) => {
     if (selectedTool === 'pointer') {
@@ -69,16 +94,16 @@ export function VideoTimeline({
     } else if (selectedTool === 'segment') {
       // 时间段工具：开始拖拽
       const time = pixelToTime(e.clientX)
+      const trackIndex = clientYToTrack(e.clientY)
       setIsDragging(true)
       setDragStart(time)
       setDragEnd(time)
+      setPendingAnnotation({ type: 'segment', startTime: time, endTime: time, trackIndex })
     } else if (selectedTool === 'timestamp') {
       // 时间戳工具：添加时间戳
       const time = pixelToTime(e.clientX)
-      setPendingAnnotation({
-        type: 'timestamp',
-        startTime: time
-      })
+      const trackIndex = clientYToTrack(e.clientY)
+      setPendingAnnotation({ type: 'timestamp', startTime: time, trackIndex })
       setShowLabelDialog(true)
     }
   }
@@ -98,11 +123,12 @@ export function VideoTimeline({
       const endTime = Math.max(dragStart, dragEnd)
       
       if (endTime - startTime > 0.1) { // 最小时间段0.1秒
-        setPendingAnnotation({
+        setPendingAnnotation((prev) => ({
           type: 'segment',
           startTime,
-          endTime
-        })
+          endTime,
+          trackIndex: prev?.trackIndex ?? 0
+        }))
         setShowLabelDialog(true)
       }
     }
@@ -120,12 +146,14 @@ export function VideoTimeline({
         startTime: pendingAnnotation.startTime,
         endTime: pendingAnnotation.endTime,
         label,
-        description: ''
+        description: '',
+        trackIndex: pendingAnnotation.trackIndex
       }
       onAnnotationAdd(annotation)
     }
     setShowLabelDialog(false)
     setPendingAnnotation(null)
+    setSelectedDialogLabel('')
   }
 
   // 快捷键处理
@@ -134,10 +162,7 @@ export function VideoTimeline({
       if (e.ctrlKey && e.key === 'd') {
         e.preventDefault()
         if (selectedTool === 'timestamp') {
-          setPendingAnnotation({
-            type: 'timestamp',
-            startTime: currentTime
-          })
+          setPendingAnnotation({ type: 'timestamp', startTime: currentTime, trackIndex: 0 })
           setShowLabelDialog(true)
         }
       }
@@ -190,16 +215,25 @@ export function VideoTimeline({
       {/* 主时间轴 */}
       <div
         ref={timelineRef}
-        className={`relative h-16 bg-gray-800 rounded border border-gray-600 ${
+        className={`relative bg-gray-800 rounded border border-gray-600 ${
           selectedTool === 'pointer' ? 'cursor-pointer' : 
           selectedTool === 'segment' ? 'cursor-crosshair' : 
           'cursor-crosshair'
         }`}
+        style={{ height: Math.max(1, trackCount) * laneHeight }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
+        {/* 轨道背景分隔 */}
+        {Array.from({ length: Math.max(1, trackCount) }).map((_, idx) => (
+          <div
+            key={`lane-${idx}`}
+            className="absolute left-0 right-0 bg-gray-700/30 border-t border-gray-600"
+            style={{ top: idx * laneHeight, height: laneHeight }}
+          />
+        ))}
         {/* 播放头 */}
         <div
           className="absolute top-0 w-0.5 h-full bg-red-500 z-20 pointer-events-none"
@@ -213,11 +247,12 @@ export function VideoTimeline({
           if (annotation.type === 'segment') {
             const left = (annotation.startTime / duration) * 100
             const width = ((annotation.endTime! - annotation.startTime) / duration) * 100
+            const top = 2 + (annotation.trackIndex ?? 0) * laneHeight
             return (
               <div
                 key={annotation.id}
-                className="absolute top-2 h-12 bg-blue-500 bg-opacity-70 border border-blue-400 rounded cursor-pointer hover:bg-opacity-90 group"
-                style={{ left: `${left}%`, width: `${width}%` }}
+                className="absolute bg-blue-500 bg-opacity-70 border border-blue-400 rounded cursor-pointer hover:bg-opacity-90 group"
+                style={{ left: `${left}%`, width: `${width}%`, top, height: laneHeight - 4 }}
                 title={`${annotation.label}: ${formatTime(annotation.startTime)} - ${formatTime(annotation.endTime!)}`}
               >
                 <div className="text-xs p-1 truncate text-white font-medium">
@@ -237,11 +272,12 @@ export function VideoTimeline({
             )
           } else {
             const left = (annotation.startTime / duration) * 100
+            const top = (annotation.trackIndex ?? 0) * laneHeight
             return (
               <div
                 key={annotation.id}
-                className="absolute top-0 w-1 h-full bg-yellow-500 cursor-pointer hover:bg-yellow-400 group"
-                style={{ left: `${left}%` }}
+                className="absolute w-1 bg-yellow-500 cursor-pointer hover:bg-yellow-400 group"
+                style={{ left: `${left}%`, top, height: laneHeight }}
                 title={`${annotation.label}: ${formatTime(annotation.startTime)}`}
               >
                 <div className="absolute -top-6 -left-4 w-8 h-6 bg-yellow-500 rounded text-xs flex items-center justify-center text-black font-bold">
@@ -265,10 +301,12 @@ export function VideoTimeline({
         {/* 拖拽预览 */}
         {isDragging && dragStart !== null && dragEnd !== null && (
           <div
-            className="absolute top-2 h-12 bg-green-500 bg-opacity-50 border border-green-400 rounded"
+            className="absolute bg-green-500 bg-opacity-50 border border-green-400 rounded"
             style={{
               left: `${(Math.min(dragStart, dragEnd) / duration) * 100}%`,
-              width: `${(Math.abs(dragEnd - dragStart) / duration) * 100}%`
+              width: `${(Math.abs(dragEnd - dragStart) / duration) * 100}%`,
+              top: 2 + (pendingAnnotation?.trackIndex ?? 0) * laneHeight,
+              height: laneHeight - 4
             }}
           />
         )}
@@ -281,16 +319,31 @@ export function VideoTimeline({
             <h3 className="text-lg font-semibold mb-4 text-gray-900">
               选择标签
             </h3>
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {['动作', '对话', '场景切换', '特效', '音乐', '其他'].map((label) => (
+            <div className="space-y-3">
+              <Select value={selectedDialogLabel} onValueChange={(v) => setSelectedDialogLabel(v)}>
+                <SelectTrigger className="h-9 text-sm w-full">
+                  <SelectValue placeholder="选择标签" />
+                </SelectTrigger>
+                <SelectContent>
+                  {groupLabels(availableLabels).map((group) => (
+                    <SelectGroup key={group.name}>
+                      <SelectLabel>{group.name}</SelectLabel>
+                      {group.options.map((opt) => (
+                        <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex justify-end">
                 <button
-                  key={label}
-                  className="w-full p-2 text-left hover:bg-gray-100 rounded border text-gray-900 transition-colors"
-                  onClick={() => handleLabelSelect(label)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                  disabled={!selectedDialogLabel}
+                  onClick={() => handleLabelSelect(selectedDialogLabel)}
                 >
-                  {label}
+                  确定
                 </button>
-              ))}
+              </div>
             </div>
             <div className="mt-4 flex justify-end">
               <button
@@ -298,6 +351,7 @@ export function VideoTimeline({
                 onClick={() => {
                   setShowLabelDialog(false)
                   setPendingAnnotation(null)
+                  setSelectedDialogLabel('')
                 }}
               >
                 取消
@@ -308,4 +362,16 @@ export function VideoTimeline({
       )}
     </div>
   )
+}
+
+function groupLabels(labels: string[]): { name: string; options: string[] }[] {
+  const map = new Map<string, string[]>()
+  for (const label of labels && labels.length ? labels : ['动作', '对话', '场景切换', '特效', '音乐', '其他']) {
+    const parts = label.split('/')
+    const group = parts[0]
+    const arr = map.get(group) ?? []
+    arr.push(label)
+    map.set(group, arr)
+  }
+  return Array.from(map.entries()).map(([name, options]) => ({ name, options }))
 }
