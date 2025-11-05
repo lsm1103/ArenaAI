@@ -4,21 +4,25 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
-import { Settings, SkipForward, CheckCircle, Home, Eye } from 'lucide-react'
+import { Settings, SkipForward, CheckCircle, Home, Eye, Upload, Download } from 'lucide-react'
 
 interface TopActionsProps {
   onSkip: (reason: string) => void
   onComplete: () => void
   onSettings: () => void
   onReset: () => void
+  onExport?: () => void
+  onImport?: (data: string) => void
   // 可选：列表显示切换（用于在列表隐藏时提供恢复入口）
   isListVisible?: boolean
   onToggleList?: () => void
 }
 
-export function TopActions({ onSkip, onComplete, onSettings, onReset, isListVisible, onToggleList }: TopActionsProps) {
+export function TopActions({ onSkip, onComplete, onSettings, onReset, onExport, onImport, isListVisible, onToggleList }: TopActionsProps) {
   const [showSkipDialog, setShowSkipDialog] = useState(false)
   const [skipReason, setSkipReason] = useState('')
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [importText, setImportText] = useState('')
 
   const handleSkip = () => {
     if (skipReason.trim()) {
@@ -87,6 +91,27 @@ export function TopActions({ onSkip, onComplete, onSettings, onReset, isListVisi
             <Settings className="w-4 h-4" />
             <span>设置</span>
           </Button>
+
+          {/* 导出/导入按钮 */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onExport && onExport()}
+            className="flex items-center space-x-1"
+          >
+            <Download className="w-4 h-4" />
+            <span>导出</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowImportDialog(true)}
+            className="flex items-center space-x-1"
+          >
+            <Upload className="w-4 h-4" />
+            <span>导入</span>
+          </Button>
         </div>
       </div>
 
@@ -124,6 +149,28 @@ export function TopActions({ onSkip, onComplete, onSettings, onReset, isListVisi
               >
                 确认跳过
               </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 导入 JSON 弹窗 */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>导入标注 JSON</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <label className="text-sm font-medium text-gray-700 mb-2 block">粘贴或上传 JSON：</label>
+            <Textarea
+              placeholder="粘贴 JSON 内容"
+              value={importText}
+              onChange={(e) => setImportText(e.target.value)}
+              className="min-h-40"
+            />
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => { setImportText(''); setShowImportDialog(false) }}>取消</Button>
+              <Button onClick={() => { onImport && onImport(importText); setShowImportDialog(false) }} disabled={!importText.trim()}>导入</Button>
             </div>
           </div>
         </DialogContent>

@@ -41,6 +41,23 @@ export interface VideoAnnotation {
   descriptions: string[]
 }
 
+// 导入/导出 JSON Schema（简单版）
+export interface AnnotationExportSchema {
+  version: '1.0'
+  videoPath: string
+  timeline: Array<{
+    id: string
+    type: 'segment' | 'timestamp'
+    startTime: number
+    endTime?: number
+    label: string
+    description?: string
+    trackIndex?: number
+  }>
+  labels: string[]
+  descriptions: string[]
+}
+
 export function AnnotationInterface({ folderPath, selectedVideos, onReset }: AnnotationInterfaceProps) {
   const [videos, setVideos] = useState<VideoFile[]>([])
   const [currentVideo, setCurrentVideo] = useState<VideoFile | null>(null)
@@ -209,6 +226,53 @@ export function AnnotationInterface({ folderPath, selectedVideos, onReset }: Ann
     setIsListVisible((v) => !v)
   }
 
+  const handleExport = () => {
+    const payload: AnnotationExportSchema = {
+      version: '1.0',
+      videoPath: currentAnnotation.videoPath,
+      timeline: currentAnnotation.timeline,
+      labels: currentAnnotation.labels,
+      descriptions: currentAnnotation.descriptions,
+    }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${(currentVideo?.name || 'annotation')}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleImport = (text: string) => {
+    try {
+      const obj = JSON.parse(text) as AnnotationExportSchema
+      if (obj.version !== '1.0') {
+        alert('不支持的版本号')
+        return
+      }
+      if (!Array.isArray(obj.timeline) || !Array.isArray(obj.labels) || !Array.isArray(obj.descriptions)) {
+        alert('JSON 结构不合法')
+        return
+      }
+      // 简单校验字段
+      const validTimeline = obj.timeline.every((t) => typeof t.id === 'string' && (t.type === 'segment' || t.type === 'timestamp') && typeof t.startTime === 'number' && (t.endTime === undefined || typeof t.endTime === 'number') && typeof t.label === 'string')
+      if (!validTimeline) {
+        alert('时间线数据不合法')
+        return
+      }
+      setCurrentAnnotation({
+        videoPath: obj.videoPath || currentAnnotation.videoPath,
+        timeline: obj.timeline,
+        labels: obj.labels,
+        descriptions: obj.descriptions,
+      })
+      alert('导入成功')
+    } catch (e) {
+      console.error(e)
+      alert('JSON 解析失败')
+    }
+  }
+
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       {/* 顶部操作栏 */}
@@ -218,6 +282,8 @@ export function AnnotationInterface({ folderPath, selectedVideos, onReset }: Ann
           onComplete={handleComplete}
           onSettings={() => setShowSettings(true)}
           onReset={onReset}
+          onExport={handleExport}
+          onImport={handleImport}
           isListVisible={isListVisible}
           onToggleList={toggleListVisibility}
         />

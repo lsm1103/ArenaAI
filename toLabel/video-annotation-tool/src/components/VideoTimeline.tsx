@@ -22,6 +22,7 @@ interface VideoTimelineProps {
   onAnnotationDelete: (id: string) => void
   selectedTool: 'pointer' | 'segment' | 'timestamp'
   trackCount?: number
+  tracks?: Array<{ id: string; name: string; locked: boolean; hidden: boolean }>
   availableLabels?: string[]
 }
 
@@ -35,6 +36,7 @@ export function VideoTimeline({
   onAnnotationDelete,
   selectedTool,
   trackCount = 1,
+  tracks,
   availableLabels = ['标签1', '标签2', '标签3']
 }: VideoTimelineProps) {
   const timelineRef = useRef<HTMLDivElement>(null)
@@ -49,8 +51,33 @@ export function VideoTimeline({
     trackIndex: number
   } | null>(null)
   const [selectedDialogLabel, setSelectedDialogLabel] = useState('')
+  const [activeSegDrag, setActiveSegDrag] = useState<{
+    id: string
+    type: 'move' | 'resize-start' | 'resize-end'
+    initialStart: number
+    initialEnd: number
+    length: number
+    offset?: number
+  } | null>(null)
 
   const laneHeight = 24
+
+  // tracks & visibility
+  const totalTracks = tracks?.length ?? Math.max(1, trackCount)
+  const visibleTrackIndices = tracks
+    ? tracks.reduce<number[]>((acc, t, i) => { if (!t.hidden) acc.push(i); return acc }, [])
+    : Array.from({ length: totalTracks }, (_, i) => i)
+  const laneCount = Math.max(1, visibleTrackIndices.length)
+  const visibleIndexToTrackIndex = (vIndex: number) => {
+    if (!tracks) return Math.max(0, Math.min(vIndex, totalTracks - 1))
+    if (visibleTrackIndices.length === 0) return 0
+    const clamped = Math.max(0, Math.min(vIndex, visibleTrackIndices.length - 1))
+    return visibleTrackIndices[clamped]
+  }
+  const trackIndexToVisibleIndex = (tIndex: number) => {
+    if (!tracks) return Math.max(0, Math.min(tIndex, totalTracks - 1))
+    return visibleTrackIndices.indexOf(tIndex)
+  }
 
   // 时间格式化
   const formatTime = (seconds: number) => {
@@ -81,8 +108,8 @@ export function VideoTimeline({
     if (!timelineRef.current) return 0
     const rect = timelineRef.current.getBoundingClientRect()
     const y = Math.max(0, Math.min(clientY - rect.top, rect.height))
-    const idx = Math.floor(y / laneHeight)
-    return Math.max(0, Math.min(idx, Math.max(0, trackCount - 1)))
+    const vIdx = Math.floor(y / laneHeight)
+    return visibleIndexToTrackIndex(vIdx)
   }
 
   // 处理鼠标按下
@@ -95,6 +122,7 @@ export function VideoTimeline({
       // 时间段工具：开始拖拽
       const time = pixelToTime(e.clientX)
       const trackIndex = clientYToTrack(e.clientY)
+      if (tracks && tracks[trackIndex]?.locked) return
       setIsDragging(true)
       setDragStart(time)
       setDragEnd(time)
@@ -103,6 +131,7 @@ export function VideoTimeline({
       // 时间戳工具：添加时间戳
       const time = pixelToTime(e.clientX)
       const trackIndex = clientYToTrack(e.clientY)
+      if (tracks && tracks[trackIndex]?.locked) return
       setPendingAnnotation({ type: 'timestamp', startTime: time, trackIndex })
       setShowLabelDialog(true)
     }
@@ -110,6 +139,26 @@ export function VideoTimeline({
 
   // 处理鼠标移动
   const handleMouseMove = (e: React.MouseEvent) => {
+    // 片段移动/拉伸交互
+    if (activeSegDrag) {
+      const MIN_LEN = 0.1
+      const mouseTime = pixelToTime(e.clientX)
+      if (activeSegDrag.type === 'move') {
+        const newStart = Math.max(0, Math.min(mouseTime - (activeSegDrag.offset ?? 0), duration - activeSegDrag.length))
+        const newEnd = newStart + activeSegDrag.length
+        onAnnotationUpdate(activeSegDrag.id, { startTime: newStart, endTime: newEnd })
+      } else if (activeSegDrag.type === 'resize-start') {
+        const maxStart = activeSegDrag.initialEnd - MIN_LEN
+        const newStart = Math.max(0, Math.min(mouseTime, maxStart))
+        onAnnotationUpdate(activeSegDrag.id, { startTime: newStart })
+      } else if (activeSegDrag.type === 'resize-end') {
+        const minEnd = activeSegDrag.initialStart + MIN_LEN
+        const newEnd = Math.min(duration, Math.max(mouseTime, minEnd))
+        onAnnotationUpdate(activeSegDrag.id, { endTime: newEnd })
+      }
+      return
+    }
+
     if (isDragging && dragStart !== null) {
       const time = pixelToTime(e.clientX)
       setDragEnd(time)
@@ -118,6 +167,9 @@ export function VideoTimeline({
 
   // 处理鼠标释放
   const handleMouseUp = () => {
+    if (activeSegDrag) {
+      setActiveSegDrag(null)
+    }
     if (isDragging && dragStart !== null && dragEnd !== null) {
       const startTime = Math.min(dragStart, dragEnd)
       const endTime = Math.max(dragStart, dragEnd)
@@ -220,14 +272,14 @@ export function VideoTimeline({
           selectedTool === 'segment' ? 'cursor-crosshair' : 
           'cursor-crosshair'
         }`}
-        style={{ height: Math.max(1, trackCount) * laneHeight }}
+        style={{ height: laneCount * laneHeight }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
         {/* 轨道背景分隔 */}
-        {Array.from({ length: Math.max(1, trackCount) }).map((_, idx) => (
+        {Array.from({ length: laneCount }).map((_, idx) => (
           <div
             key={`lane-${idx}`}
             className="absolute left-0 right-0 bg-gray-700/30 border-t border-gray-600"
@@ -247,24 +299,74 @@ export function VideoTimeline({
           if (annotation.type === 'segment') {
             const left = (annotation.startTime / duration) * 100
             const width = ((annotation.endTime! - annotation.startTime) / duration) * 100
-            const top = 2 + (annotation.trackIndex ?? 0) * laneHeight
+            const vIndex = trackIndexToVisibleIndex(annotation.trackIndex ?? 0)
+            if (vIndex < 0) return null // 隐藏的轨道不渲染
+            const top = 2 + vIndex * laneHeight
+            const locked = tracks ? !!tracks[annotation.trackIndex ?? 0]?.locked : false
             return (
               <div
                 key={annotation.id}
-                className="absolute bg-blue-500 bg-opacity-70 border border-blue-400 rounded cursor-pointer hover:bg-opacity-90 group"
+                className={`absolute bg-blue-500 bg-opacity-70 border border-blue-400 rounded group ${selectedTool==='pointer' && !locked ? 'cursor-move' : 'cursor-default'}`}
                 style={{ left: `${left}%`, width: `${width}%`, top, height: laneHeight - 4 }}
                 title={`${annotation.label}: ${formatTime(annotation.startTime)} - ${formatTime(annotation.endTime!)}`}
+                onMouseDown={(e) => {
+                  if (selectedTool !== 'pointer') return
+                  if (locked) return
+                  e.stopPropagation()
+                  const mouseTime = pixelToTime(e.clientX)
+                  const len = (annotation.endTime ?? annotation.startTime) - annotation.startTime
+                  setActiveSegDrag({
+                    id: annotation.id,
+                    type: 'move',
+                    initialStart: annotation.startTime,
+                    initialEnd: annotation.endTime ?? annotation.startTime,
+                    length: Math.max(len, 0),
+                    offset: mouseTime - annotation.startTime,
+                  })
+                }}
               >
                 <div className="text-xs p-1 truncate text-white font-medium">
                   {annotation.label}
                 </div>
+                {/* 左右拉伸手柄 */}
+                <div
+                  className={`absolute left-0 top-0 bottom-0 w-1.5 bg-blue-300/60 hover:bg-blue-200 ${selectedTool==='pointer' && !locked ? 'cursor-ew-resize' : 'cursor-default'}`}
+                  onMouseDown={(e) => {
+                    if (selectedTool !== 'pointer') return
+                    if (locked) return
+                    e.stopPropagation()
+                    setActiveSegDrag({
+                      id: annotation.id,
+                      type: 'resize-start',
+                      initialStart: annotation.startTime,
+                      initialEnd: annotation.endTime ?? annotation.startTime,
+                      length: (annotation.endTime ?? annotation.startTime) - annotation.startTime,
+                    })
+                  }}
+                />
+                <div
+                  className={`absolute right-0 top-0 bottom-0 w-1.5 bg-blue-300/60 hover:bg-blue-200 ${selectedTool==='pointer' && !locked ? 'cursor-ew-resize' : 'cursor-default'}`}
+                  onMouseDown={(e) => {
+                    if (selectedTool !== 'pointer') return
+                    if (locked) return
+                    e.stopPropagation()
+                    setActiveSegDrag({
+                      id: annotation.id,
+                      type: 'resize-end',
+                      initialStart: annotation.startTime,
+                      initialEnd: annotation.endTime ?? annotation.startTime,
+                      length: (annotation.endTime ?? annotation.startTime) - annotation.startTime,
+                    })
+                  }}
+                />
                 {/* 删除按钮 */}
                 <button
                   className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                   onClick={(e) => {
                     e.stopPropagation()
-                    onAnnotationDelete(annotation.id)
+                    if (!locked) onAnnotationDelete(annotation.id)
                   }}
+                  disabled={locked}
                 >
                   ×
                 </button>
@@ -272,7 +374,9 @@ export function VideoTimeline({
             )
           } else {
             const left = (annotation.startTime / duration) * 100
-            const top = (annotation.trackIndex ?? 0) * laneHeight
+            const vIndex = trackIndexToVisibleIndex(annotation.trackIndex ?? 0)
+            if (vIndex < 0) return null
+            const top = vIndex * laneHeight
             return (
               <div
                 key={annotation.id}
